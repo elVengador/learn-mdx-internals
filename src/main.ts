@@ -34,12 +34,20 @@ other text
 - lit
 `;
 
+const nodeSelector = (node: mdx.MdxJsxFlowElement) => {
+  const selectorType = node.attributes[0].name ?? null;
+  const selectorValue = node.attributes[0].value;
+  if (!selectorType) return null;
+  // if (selectorType === "id") return String("#" + selectorValue);
+  return String("#" + selectorValue);
+};
+
 const onUpdatePropertyOnMdx = (
   tagName: string, // TaskList
   property: string, // tasks
   value: string, // `[]`
   selector: string // #01 https://github.com/syntax-tree/unist-util-select
-) => {
+): string => {
   const processor = unified()
     .use(remarkParse)
     .use(remarkMdx)
@@ -54,13 +62,44 @@ const onUpdatePropertyOnMdx = (
 
   console.log(1, { astx });
   // visit(astx , (node) => { // ℹ️ use this to access to all nodes: https://unifiedjs.com/learn/recipe/tree-traversal/
+  console.log("omoteta", { tagName, property, value, selector });
   visit(astx, "mdxJsxFlowElement", (node) => {
     console.log("tree:", { node });
+
+    if (
+      node.name === tagName &&
+      node.attributes.find(
+        (c) => c.name === "id" && c.value === selector.slice(1)
+      )
+    ) {
+      node.attributes.map((c) =>
+        c.name === property ? (c.value = value) : c.value
+      );
+      console.log({ update: node.attributes });
+    }
+
+    // if (nodeSelector(node) === selector) {
+    //   node.attributes.map((c) =>
+    //     c.name === property ? (c.value = value) : false
+    //   );
+    // }
+    console.log("run", { nodeValue: node.attributes[1].value.value });
   });
   console.log(2, { astx });
+  const note = astx;
+  return note;
 };
 
-onUpdatePropertyOnMdx("TT", "tasks", '[{a:"1e",b:"1e"},{a:"2",b:"2"}]', "#01");
+// onUpdatePropertyOnMdx("TT", "tasks", '[{a:"1e",b:"1e"},{a:"2",b:"2"}]', "#01");
+const newNote = onUpdatePropertyOnMdx(
+  "TT",
+  "tasks",
+  '[{a:"hello",b:"world"}]',
+  "#03"
+);
+
+console.log({ newNote });
+console.log({ tree: newNote, string: newNote.serializeToString(doc) });
 
 // Procesamos el Markdown con JSX y lo convertimos en un AST
 // const astWithJSX = processor.parse(markdownWithJSX);
