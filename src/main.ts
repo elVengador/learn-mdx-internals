@@ -5,8 +5,14 @@ import "./style.css";
 import { micromark } from "micromark";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
 import remarkMdx from "remark-mdx";
 import { visit } from "unist-util-visit";
+// import { toString } from "nlcst-to-string";
+// const unified = require("unified");
+// const remarkParse = require("remark-parse");
+// const remarkStringify = require("remark-stringify");
+// const remarkMdx = require("remark-mdx");
 
 /**
  * some usefull links
@@ -99,7 +105,23 @@ const newNote = onUpdatePropertyOnMdx(
 );
 
 console.log({ newNote });
-console.log({ tree: newNote, string: newNote.serializeToString(doc) });
+
+// console.log({ tree: newNote, string: newNote.serializeToString(doc) });
+
+// console.log(toString(newNote));
+
+const u = unified().use(remarkParse).use(remarkStringify).use(remarkMdx);
+
+// const src = `
+// # Hello, world!
+
+// <div>!!!</div>
+// `
+
+// const ast = u.parse(src)
+const mdx = u.stringify(newNote);
+
+console.log({ mdx });
 
 // Procesamos el Markdown con JSX y lo convertimos en un AST
 // const astWithJSX = processor.parse(markdownWithJSX);
